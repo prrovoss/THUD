@@ -10,7 +10,11 @@ namespace Turbo.Plugins.Prrovoss
     {
         public List<Popup> Popups { get; set; }
         public TopLabelWithTitleDecorator PopupDecorator { get; set; }
-        public float RatioX, RatioY, RatioW, RatioH, VerticalGap;
+        public float RatioX { get; set; }
+        public float RatioY { get; set; }
+        public float RatioW { get; set; }
+        public float RatioH { get; set; }
+        public float VerticalGap { get; set; }
 
         public class Popup
         {
