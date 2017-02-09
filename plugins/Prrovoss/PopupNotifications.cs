@@ -10,7 +10,7 @@ namespace Turbo.Plugins.Prrovoss
     {
         public List<Popup> Popups { get; set; }
         public TopLabelWithTitleDecorator PopupDecorator { get; set; }
-        public float X, Y, W, H;
+        public float RatioX, RatioY, RatioW, RatioH, VerticalGap;
 
         public class Popup
         {
@@ -58,10 +58,11 @@ namespace Turbo.Plugins.Prrovoss
                 TitleFont = Hud.Render.CreateFont("tahoma", 6, 255, 180, 147, 109, true, false, false),
             };
 
-            W = Hud.Window.Size.Height * 0.18f;
-            H = Hud.Window.Size.Height * 0.05f;
-            X = Hud.Window.Size.Width * 0.6f;
-            Y = Hud.Window.Size.Height * 0.75f;
+            RatioX = 0.6f;
+            RatioY = 0.75f;
+            RatioW = 0.18f;
+            RatioH = 0.05f;
+            VerticalGap = 1.20f;
 
 
             Popups = new List<Popup>();
@@ -70,6 +71,13 @@ namespace Turbo.Plugins.Prrovoss
         public override void PaintWorld(WorldLayer layer)
         {
             int ctr = 0;
+
+
+            var w = Hud.Window.Size.Height * RatioW;
+            var h = Hud.Window.Size.Height * RatioH;
+            var x = Hud.Window.Size.Width * RatioX;
+            var y = Hud.Window.Size.Height * RatioY;
+
             Popup p;
             while ((ctr < Popups.Count) && (ctr < 13))
             {
@@ -80,7 +88,7 @@ namespace Turbo.Plugins.Prrovoss
                 }
                 else
                 {
-                    PopupDecorator.Paint(X, Y - ctr * (H * 1.20f), W, H, p.Text, p.Title, p.Hint);
+                    PopupDecorator.Paint(x, y - ctr * (h * VerticalGap), w, h, p.Text, p.Title, p.Hint);
                     ctr++;
                 }
             }
