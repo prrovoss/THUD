@@ -11,7 +11,7 @@ namespace Turbo.Plugins.Prrovoss
             if (item.Quality >= ItemQuality.Legendary)
                 Hud.RunOnPlugin<PopupNotifications>(plugin =>
                     {
-                        plugin.Show(item.SnoItem.NameLocalized + (item.AncientRank == 1 ? " (A)" : "") + (item.AncientRank == 2 ? " (P)" : ""), "Legendary dropped", 10000, "Hurray");
+                        plugin.Show(item.SnoItem.NameLocalized + (item.AncientRank == 1 ? " (A)" : (item.AncientRank == 2 ? " (P)" : "")) , "Legendary dropped", 10000, "Hurray");
                     });
         }
 
