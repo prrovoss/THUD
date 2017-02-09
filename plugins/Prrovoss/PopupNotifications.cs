@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using Turbo.Plugins.Default;
 
@@ -70,14 +71,10 @@ namespace Turbo.Plugins.Prrovoss
             var x = Hud.Window.Size.Width * RatioX;
             var y = Hud.Window.Size.Height * RatioY;
 
-            foreach (Popup p in Hud.Queue.GetItems<Popup>())
+            foreach (Popup p in Hud.Queue.GetItems<Popup>().Take(13))
             {
-                if (ctr < 13)
-                {
                     PopupDecorator.Paint(x, y - ctr * (h * VerticalGap), w, h, p.Text, p.Title, p.Hint);
                     ctr++;
-                }
-                else { return; }
             }
 
         }
