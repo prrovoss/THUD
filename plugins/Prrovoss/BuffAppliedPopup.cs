@@ -35,6 +35,10 @@ namespace Turbo.Plugins.Prrovoss
             BuffsToWatch.Add(new Buff(246562, 1, "Flying Dragon"));
         }
 
+        public void Add(uint sno, int icon, string name) {
+            BuffsToWatch.Add(new Buff(sno, icon, name));
+        }
+
         public override void PaintWorld(WorldLayer layer)
         {
 
