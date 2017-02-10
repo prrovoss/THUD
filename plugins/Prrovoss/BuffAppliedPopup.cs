@@ -7,7 +7,7 @@ using Turbo.Plugins.Default;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class BuffApplied : BasePlugin
+    public class BuffAppliedPopup : BasePlugin
     {
         public class Buff
         {
@@ -59,7 +59,7 @@ namespace Turbo.Plugins.Prrovoss
 
         }
 
-        public BuffApplied()
+        public BuffAppliedPopup()
         {
             Enabled = true;
         }
