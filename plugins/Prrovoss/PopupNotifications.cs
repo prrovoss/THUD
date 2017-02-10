@@ -64,8 +64,6 @@ namespace Turbo.Plugins.Prrovoss
 
         public override void PaintWorld(WorldLayer layer)
         {
-            int ctr = 0;
-
             var w = Hud.Window.Size.Height * RatioW;
             var h = Hud.Window.Size.Height * RatioH;
             var x = Hud.Window.Size.Width * RatioX;
@@ -73,10 +71,9 @@ namespace Turbo.Plugins.Prrovoss
 
             foreach (Popup p in Hud.Queue.GetItems<Popup>().Take(13))
             {
-                    PopupDecorator.Paint(x, y - ctr * (h * VerticalGap), w, h, p.Text, p.Title, p.Hint);
-                    ctr++;
+                    PopupDecorator.Paint(x, y , w, h, p.Text, p.Title, p.Hint);
+                    y -= h * VerticalGap;
             }
-
         }
 
 
