@@ -8,12 +8,14 @@ namespace Turbo.Plugins.Prrovoss
         public bool DrawCursorCircle { get; set; }
         public bool DrawCursorLabel { get; set; }
         public bool DrawTopLabel { get; set; }
+        public bool DrawCursorLine { get; set; }
 
         public int Distance { get; set; }
 
         public TopLabelWithTitleDecorator CursorLabelDecorator { get; set; }
         public TopLabelWithTitleDecorator TopLabelDecorator { get; set; }
         public IBrush CursorCircleBrush { get; set; }
+        public IBrush LineBrush { get; set; }
 
         public float TopLabelXRatio { get; set; }
         public float TopLabelYRatio { get; set; }
@@ -30,6 +32,9 @@ namespace Turbo.Plugins.Prrovoss
             Enabled = true;
         }
 
+
+
+
         public override void Load(IController hud)
         {
             base.Load(hud);
@@ -38,6 +43,7 @@ namespace Turbo.Plugins.Prrovoss
             DrawCursorCircle = true;
             DrawCursorLabel = true;
             DrawTopLabel = true;
+            DrawCursorLine = false;
             Distance = 12;
 
             TopLabelDecorator = new TopLabelWithTitleDecorator(Hud)
@@ -61,6 +67,8 @@ namespace Turbo.Plugins.Prrovoss
             CursorLabelYOffset = 35f;
             CursorLabelWRatio = 0.025f;
             CursorLabelHRatio = 0.015f;
+
+            LineBrush = Hud.Render.CreateBrush(255, 255, 255, 255, 3.0f);
         }
 
         public override void PaintWorld(WorldLayer layer)
@@ -91,6 +99,10 @@ namespace Turbo.Plugins.Prrovoss
                     float width = Hud.Window.Size.Height * TopLabelWRatio;
                     float height = Hud.Window.Size.Height * TopLabelHRatio;
                     TopLabelDecorator.Paint(x - width / 2, y, width, height, count.ToString(), null, "");
+                }
+                if(DrawCursorLine) {
+                            var player = Hud.Game.Me.ScreenCoordinate;
+							LineBrush.DrawLine(player.X, player.Y, coord.X, coord.Y);
                 }
             }
         }
