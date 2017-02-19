@@ -3,7 +3,7 @@ using Turbo.Plugins.Default;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class MonsterDensityAroundCursor : BasePlugin
+    public class MonsterDensityAroundCursor : BasePlugin, IInGameWorldPainter 
     {
         public bool DrawCursorCircle { get; set; }
         public bool DrawCursorLabel { get; set; }
@@ -29,7 +29,7 @@ namespace Turbo.Plugins.Prrovoss
 
         public MonsterDensityAroundCursor()
         {
-            Enabled = true;
+            Enabled = false;
         }
 
 
@@ -71,7 +71,7 @@ namespace Turbo.Plugins.Prrovoss
             LineBrush = Hud.Render.CreateBrush(255, 255, 255, 255, 3.0f);
         }
 
-        public override void PaintWorld(WorldLayer layer)
+        public void PaintWorld(WorldLayer layer)
         {
             if (!Hud.Game.Me.IsInTown)
             {

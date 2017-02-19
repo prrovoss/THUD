@@ -3,13 +3,13 @@ using Turbo.Plugins.Default;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class CustomLabelPlugin_Example : BasePlugin
+    public class CustomLabelPlugin_Example : BasePlugin, ICustomizer 
     {
 
         public CustomLabelPlugin_Example()
         {
             // Change this to true if you want to see the new labels
-            Enabled = true;
+            Enabled = false;
         }
 
         public override void Load(IController hud)
@@ -32,7 +32,7 @@ namespace Turbo.Plugins.Prrovoss
             }
         }
 
-        public override void Customize()
+        public void Customize()
         {
             // This plugin shows you how to use the custom label plugin. 
             // This plugin will be overwritten everytime you update the custom label plugin! 
@@ -56,7 +56,7 @@ namespace Turbo.Plugins.Prrovoss
             healthLabel.BackgroundBrush = Hud.Render.CreateBrush(50, 180, 147, 109, -1);
             healthLabel.TextFont = Hud.Render.CreateFont("Arial", 9, 150, 0, 0, 255, true, true, true);
             // add a default condition 
-            healthLabel.addCondition(Conditions.notInTown);
+            healthLabel.addCondition(new Conditions.notInTown());
             // now add the label itself
             labels.add(healthLabel);
 

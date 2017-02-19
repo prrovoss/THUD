@@ -3,7 +3,7 @@ using Turbo.Plugins.Default;
 
 namespace Turbo.Plugins.Prrovoss
 {
-    public class CustomLabelPlugin : BasePlugin
+    public class CustomLabelPlugin : BasePlugin, IInGameTopPainter 
     {
 
 
@@ -34,14 +34,14 @@ namespace Turbo.Plugins.Prrovoss
 
         public override void Load(IController hud)
         {
-            Hud = hud;
+            base.Load(hud);
             labels = new List<CustomLabel>();
         }
 
-        public override void PaintTopInGame(ClipState clipState)
+        public void PaintTopInGame(ClipState clipState)
         {
-            if (clipState == ClipState.BeforeClip)
-            {
+            //if (clipState == ClipState.BeforeClip)
+            //{
                 foreach (CustomLabel l in this.labels)
                 {
                     if (l.show())
@@ -50,7 +50,7 @@ namespace Turbo.Plugins.Prrovoss
                         l.Decorator.Paint(l.x, l.y, l.width, l.heigth, l.text, null, l.hint);
                     }
                 }
-            }
+            //}
         }
     }
 }

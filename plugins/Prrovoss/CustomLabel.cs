@@ -108,7 +108,7 @@ namespace Turbo.Plugins.Prrovoss
                     this.text = this.baseText;
                 }
 
-                this.text = Regex.Replace(this.text, @"\*(\S+)", m => Expressions.Value(m.Groups[0].Value));
+                this.text = Regex.Replace(this.text, @"\*(\S+)", m => Hud.GetPlugin<ExpressionsPlugin>().Value(m.Groups[0].Value));
             }
             catch
             {

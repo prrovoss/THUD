@@ -1,13 +1,11 @@
 using System.Collections.Generic;
-using System;
-using System.Linq;
 
 using Turbo.Plugins.Default;
 
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class BuffAppliedPopup : BasePlugin
+    public class BuffAppliedPopup : BasePlugin, IInGameWorldPainter
     {
         public class Buff
         {
@@ -39,7 +37,7 @@ namespace Turbo.Plugins.Prrovoss
             BuffsToWatch.Add(new Buff(sno, icon, name));
         }
 
-        public override void PaintWorld(WorldLayer layer)
+        public void PaintWorld(WorldLayer layer)
         {
 
             foreach (Buff buff in BuffsToWatch)

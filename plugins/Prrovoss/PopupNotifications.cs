@@ -6,7 +6,7 @@ using Turbo.Plugins.Default;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class PopupNotifications : BasePlugin
+    public class PopupNotifications : BasePlugin, IInGameWorldPainter 
     {
         public TopLabelWithTitleDecorator PopupDecorator { get; set; }
         public float RatioX { get; set; }
@@ -62,7 +62,7 @@ namespace Turbo.Plugins.Prrovoss
             VerticalGap = 1.20f;
         }
 
-        public override void PaintWorld(WorldLayer layer)
+        public void PaintWorld(WorldLayer layer)
         {
             var w = Hud.Window.Size.Height * RatioW;
             var h = Hud.Window.Size.Height * RatioH;

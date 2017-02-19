@@ -6,24 +6,31 @@ namespace Turbo.Plugins.Prrovoss
     using System.Globalization;
     using System.Collections.Generic;
 
-    public static class Expressions
+    public class ExpressionsPlugin : BasePlugin
     {
-        public static IController Hud { get; set; }
-        public static IPlayerDefenseInfo Def { get { return Hud.Game.Me.Defense; } }
-        public static IPlayerOffenseInfo Dmg { get { return Hud.Game.Me.Offense; } }
-        public static IPlayerStatInfo Stats { get { return Hud.Game.Me.Stats; } }
-        public static IPlayer Me { get { return Hud.Game.Me; } }
+        // public static IController Hud { get; set; }
+        public IPlayerDefenseInfo Def { get { return Hud.Game.Me.Defense; } }
+        public IPlayerOffenseInfo Dmg { get { return Hud.Game.Me.Offense; } }
+        public IPlayerStatInfo Stats { get { return Hud.Game.Me.Stats; } }
+        public IPlayer Me { get { return Hud.Game.Me; } }
 
-        private static Dictionary<string, Func<string>> list;
+        private Dictionary<string, Func<string>> list;
 
 
-        public static string Value(string type)
+        public string Value(string type)
         {
             return list[type].Invoke();
         }
 
-        static Expressions()
+        public override void Load(IController hud)
         {
+            base.Load(hud);
+        }
+
+
+        public ExpressionsPlugin()
+        {
+            Enabled = true;
             list = new Dictionary<string, Func<string>>();
 
             list["*bloodshards-total"] = (() => BasePlugin.ValueToString(Me.Materials.BloodShard, ValueFormat.LongNumber));
@@ -35,7 +42,7 @@ namespace Turbo.Plugins.Prrovoss
             list["*gold-in-stash-nok"] = (() => BasePlugin.ValueToString(Me.Materials.Gold, ValueFormat.NormalNumberNoDecimal));
             list["*hp-cur"] = (() => BasePlugin.ValueToString(Def.HealthCur, ValueFormat.LongNumber));
             list["*hp-cur-nok"] = (() => BasePlugin.ValueToString(Def.HealthCur, ValueFormat.NormalNumberNoDecimal));
-            list["*hp-cur-pct"] = (() =>Def.HealthPct.ToString("F0", CultureInfo.InvariantCulture) + "%");
+            list["*hp-cur-pct"] = (() => Def.HealthPct.ToString("F0", CultureInfo.InvariantCulture) + "%");
             list["*hp-max"] = (() => Def.HealthMax.ToString("F0", CultureInfo.InvariantCulture));
             list["*ehp-max"] = (() => BasePlugin.ValueToString(Def.EhpMax, ValueFormat.LongNumber));
             list["*ehp-max-nok"] = (() => BasePlugin.ValueToString(Def.EhpMax, ValueFormat.NormalNumberNoDecimal));
@@ -53,7 +60,7 @@ namespace Turbo.Plugins.Prrovoss
             list["*attackspeed"] = (() => Dmg.AttackSpeed.ToString("F2", CultureInfo.InvariantCulture) + "/s");
             list["*dps-sheet"] = (() => BasePlugin.ValueToString(Dmg.SheetDps, ValueFormat.LongNumber));
 
-            
+
             list["*dps-cur"] = (() => BasePlugin.ValueToString(Me.Damage.CurrentDps, ValueFormat.LongNumber));
             list["*dps-run"] = (() => BasePlugin.ValueToString(Me.Damage.RunDps, ValueFormat.LongNumber));
             list["*magicfind"] = (() => Stats.MagicFind.ToString("F0", CultureInfo.InvariantCulture) + "%");
@@ -168,18 +175,4 @@ namespace Turbo.Plugins.Prrovoss
 
     }
 
-    public class ExpressionsPlugin : BasePlugin
-    {
-
-        public ExpressionsPlugin()
-        {
-            Enabled = true;
-        }
-
-        public override void Load(IController hud)
-        {
-            Hud = Expressions.Hud = hud;
-        }
-
-    }
 }
