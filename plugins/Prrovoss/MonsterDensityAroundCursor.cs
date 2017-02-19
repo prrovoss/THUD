@@ -29,7 +29,7 @@ namespace Turbo.Plugins.Prrovoss
 
         public MonsterDensityAroundCursor()
         {
-            Enabled = false;
+            Enabled = true;
         }
 
 
