@@ -11,7 +11,6 @@ namespace Turbo.Plugins.Prrovoss
     {
         public bool Show { get; set; }
         public IKeyEvent ToggleKeyEvent { get; set; }
-        public IKeyEvent DebugKeyEvent { get; set; }
         public float SkillRatio { get; set; }
         public float GemRatio { get; set; }
         public float KanaiRatio { get; set; }
