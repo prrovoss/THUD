@@ -35,7 +35,7 @@ namespace Turbo.Plugins.Prrovoss
         {
             base.Load(hud);
 
-            Show = true;
+            Show = false;
             ToggleKeyEvent = Hud.Input.CreateKeyEvent(true, Key.F8, false, false, false);
 
             LegendaryGemItemIDs = new Dictionary<uint, uint>();
