@@ -48,15 +48,15 @@ namespace Turbo.Plugins.Prrovoss
                 CooldownFont = Hud.Render.CreateFont("arial", 8, 255, 255, 255, 255, true, false, 255, 0, 0, 0, true),
                 SkillDpsBackgroundBrushesByElementalType = new IBrush[]
                 {
-                    Hud.Render.CreateBrush(0, 255, 6, 0, 0),
-                    Hud.Render.CreateBrush(0, 183, 57, 7, 0),
-                    Hud.Render.CreateBrush(0, 0, 38, 119, 0),
-                    Hud.Render.CreateBrush(0, 77, 102, 155, 0),
-                    Hud.Render.CreateBrush(0, 50, 106, 21, 0),
-                    Hud.Render.CreateBrush(0, 138, 0, 94, 0),
-                    Hud.Render.CreateBrush(0, 190, 117, 0, 0),
+                    Hud.Render.CreateBrush(222, 255, 6, 0, 0),
+                    Hud.Render.CreateBrush(222, 183, 57, 7, 0),
+                    Hud.Render.CreateBrush(222, 0, 38, 119, 0),
+                    Hud.Render.CreateBrush(222, 77, 102, 155, 0),
+                    Hud.Render.CreateBrush(222, 50, 106, 21, 0),
+                    Hud.Render.CreateBrush(222, 138, 0, 94, 0),
+                    Hud.Render.CreateBrush(222, 190, 117, 0, 0),
                 },
-                SkillDpsFont = Hud.Render.CreateFont("tahoma", 7, 0, 255, 255, 255, false, false, 0, 0, 0, 0, false),
+                SkillDpsFont = Hud.Render.CreateFont("tahoma", 7, 222, 255, 255, 255, false, false, 0, 0, 0, 0, false),
             };
             SkillRatio = 0.025f;
             KanaiRatio = 0.025f;
@@ -139,7 +139,8 @@ namespace Turbo.Plugins.Prrovoss
 
         private void DrawLegendaryGems(IPlayer player)
         {
-            IEnumerable<IBuff> gemBuffs = LegendaryPowerInfoExtensions.EquippedLegendaryGemsPrimaryBuffs(player.Powers.UsedLegendaryPowers).Where(b => b.Active);
+
+            IEnumerable<IBuff> gemBuffs = LegendaryPowerInfoExtensions.EquippedLegendaryGemsPrimaryBuffs(player.Powers.UsedLegendaryGems).Where(b => b.Active);
             var size = Hud.Window.Size.Width * GemRatio;
             var portraitRect = player.PortraitUiElement.Rectangle;
             var index = 0;
@@ -186,7 +187,7 @@ namespace Turbo.Plugins.Prrovoss
                 {
                     index = skill.Key <= ActionKey.RightSkill ? (int)skill.Key + 4 : (int)skill.Key - 2;
 
-                    var y = portraitRect.Y + YOffset;
+                    var y = portraitRect.Y + YOffset - portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(currentX, y, size, size);
 
@@ -206,7 +207,7 @@ namespace Turbo.Plugins.Prrovoss
             {
                 if (skill != null)
                 {
-                    var y = portraitRect.Y + YOffset + size;
+                    var y = portraitRect.Y + YOffset + size + portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(passivesX, y, size, size);
 
