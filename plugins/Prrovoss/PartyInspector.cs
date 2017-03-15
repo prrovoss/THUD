@@ -3,6 +3,7 @@ using SharpDX.DirectInput;
 using SharpDX;
 using System.Linq;
 using System.Collections.Generic;
+using Turbo.Plugins.Jack.Extensions;
 
 namespace Turbo.Plugins.Prrovoss
 {
@@ -136,11 +137,10 @@ namespace Turbo.Plugins.Prrovoss
                 }
             }
         }
-
         private void DrawLegendaryGems(IPlayer player)
         {
 
-            IEnumerable<IBuff> gemBuffs = LegendaryPowerInfoExtensions.EquippedLegendaryGemsPrimaryBuffs(player.Powers.UsedLegendaryGems).Where(b => b.Active);
+            IEnumerable<IBuff> gemBuffs = player.Powers.UsedLegendaryGems.AllGemPrimaryBuffs().Where(b => b.Active);
             var size = Hud.Window.Size.Width * GemRatio;
             var portraitRect = player.PortraitUiElement.Rectangle;
             var index = 0;
