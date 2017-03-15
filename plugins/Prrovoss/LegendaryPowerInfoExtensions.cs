@@ -6,21 +6,13 @@ namespace Turbo.Plugins.Prrovoss
     {
         public static IEnumerable<IBuff> EquippedLegendaryPowers(this ILegendaryPowerInfo powerInfo)
         {
-            foreach (var buff in powerInfo.EquippedLegendaryGemsPrimaryBuffs())
-            {
-                yield return buff;
-            }
-            foreach (var buff in powerInfo.EquippedLegendaryGemsSecondaryBuffs())
-            {
-                yield return buff;
-            }
             foreach (var buff in powerInfo.EquippedLegendaryItemsBuffs())
             {
                 yield return buff;
             }
         }
 
-        public static IEnumerable<IBuff> EquippedLegendaryGemsPrimaryBuffs(this ILegendaryPowerInfo powerInfo)
+        public static IEnumerable<IBuff> EquippedLegendaryGemsPrimaryBuffs(this ILegendaryGemInfo powerInfo)
         {
             if (powerInfo.BaneOfThePowerfulPrimary != null) yield return powerInfo.BaneOfThePowerfulPrimary;
             if (powerInfo.BaneOfTheStrickenPrimary != null) yield return powerInfo.BaneOfTheStrickenPrimary;
@@ -46,7 +38,7 @@ namespace Turbo.Plugins.Prrovoss
             if (powerInfo.ZeisStoneOfVengeancePrimary != null) yield return powerInfo.ZeisStoneOfVengeancePrimary;
         }
 
-                public static IEnumerable<IBuff> EquippedLegendaryGemsSecondaryBuffs(this ILegendaryPowerInfo powerInfo)
+                public static IEnumerable<IBuff> EquippedLegendaryGemsSecondaryBuffs(this ILegendaryGemInfo powerInfo)
         {
             if (powerInfo.BaneOfThePowerfulSecondary != null) yield return powerInfo.BaneOfThePowerfulSecondary;
             if (powerInfo.BaneOfTheStrickenSecondary != null) yield return powerInfo.BaneOfTheStrickenSecondary;
