@@ -15,12 +15,14 @@ namespace Turbo.Plugins.Prrovoss
         public float SkillRatio { get; set; }
         public float GemRatio { get; set; }
         public float KanaiRatio { get; set; }
+        public float ItemRatio { get; set; }
         public SkillPainter SkillPainter { get; set; }
         public Dictionary<uint, uint> LegendaryGemItemIDs { get; set; }
         public float XOffset { get; set; }
         public float YOffset { get; set; }
         public float Gap { get; set; }
         public bool DrawKanai { get; set; }
+        public bool DrawLegendaryItems { get; set; }
         public bool DrawGems { get; set; }
         public bool DrawSkills { get; set; }
         public List<int> ElementOrder { get; set; }
@@ -36,7 +38,7 @@ namespace Turbo.Plugins.Prrovoss
         {
             base.Load(hud);
 
-            Show = false;
+            Show = true;
             ToggleKeyEvent = Hud.Input.CreateKeyEvent(true, Key.F8, false, false, false);
 
             LegendaryGemItemIDs = new Dictionary<uint, uint>();
@@ -61,6 +63,7 @@ namespace Turbo.Plugins.Prrovoss
             };
             SkillRatio = 0.025f;
             KanaiRatio = 0.025f;
+            ItemRatio = 0.025f;
             GemRatio = 0.0166666666666667f;
 
             LegendaryGemItemIDs.Add(428348, 3249948847); //Stricken
@@ -86,15 +89,16 @@ namespace Turbo.Plugins.Prrovoss
             LegendaryGemItemIDs.Add(403460, 3248619178); //WoL
             LegendaryGemItemIDs.Add(403468, 3249733225); //Zeis
 
-            XOffset = Hud.Window.Size.Width * 0.16f;
+            XOffset = Hud.Window.Size.Width * 0.14f;
             YOffset = Hud.Window.Size.Width * 0.012f;
             Gap = Hud.Window.Size.Width * 0.012f;
 
             DrawGems = true;
             DrawKanai = true;
             DrawSkills = true;
+            DrawLegendaryItems = true;
 
-            ElementOrder = new List<int>(new int[] { 0, 1, 2 });
+            ElementOrder = new List<int>(new int[] { 0, 1, 2, 3 });
         }
 
         public void PaintWorld(WorldLayer layer)
@@ -112,10 +116,7 @@ namespace Turbo.Plugins.Prrovoss
                             case 0:
                                 if (DrawKanai)
                                 {
-                                    if (player.CubeSnoItem1 != null) DrawKanaiItem(player.CubeSnoItem1, player.PortraitUiElement.Rectangle);
-                                    if (player.CubeSnoItem2 != null) DrawKanaiItem(player.CubeSnoItem2, player.PortraitUiElement.Rectangle);
-                                    if (player.CubeSnoItem3 != null) DrawKanaiItem(player.CubeSnoItem3, player.PortraitUiElement.Rectangle);
-                                    currentX += Gap;
+                                    DrawKanaiItems(player);
                                 }
                                 break;
 
@@ -132,14 +133,80 @@ namespace Turbo.Plugins.Prrovoss
                                     DrawPlayerSkills(player);
                                 }
                                 break;
+                            case 3:
+                                if (DrawLegendaryItems)
+                                {
+                                    DrawLegItems(player);
+                                }
+                                break;
                         }
                     }
+
                 }
             }
         }
+
+
+        private void DrawLegItems(IPlayer player)
+        {
+            foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
+            {
+                var snoItem = Hud.Inventory.GetSnoItem(buff.SnoPower.GetItemSno());
+                if (snoItem != player.CubeSnoItem1 && snoItem != player.CubeSnoItem2 && snoItem != player.CubeSnoItem3) DrawItem(snoItem, player);
+            }
+            currentX += Gap;
+        }
+
+        private void DrawKanaiItems(IPlayer player)
+        {
+            if (player.CubeSnoItem1 != null) DrawItem(player.CubeSnoItem1, player);
+            if (player.CubeSnoItem2 != null) DrawItem(player.CubeSnoItem2, player);
+            if (player.CubeSnoItem3 != null) DrawItem(player.CubeSnoItem3, player);
+            currentX += Gap;
+        }
+
+        private void DrawItem(ISnoItem snoItem, IPlayer player)
+        {
+            var portraitRect = player.PortraitUiElement.Rectangle;
+
+            var itemRect = new System.Drawing.RectangleF(currentX, portraitRect.Y, Hud.Window.Size.Width * ItemRatio, Hud.Window.Size.Width * ItemRatio * 2);
+            itemRect.Offset(0, YOffset);
+            if (snoItem.ItemHeight == 1)
+            {
+                itemRect.Offset(0, YOffset);
+                itemRect.Height /= 2;
+            }
+
+            var slotTexture = Hud.Texture.InventorySlotTexture;
+            slotTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+
+            if (Hud.Window.CursorInsideRect(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height))
+            {
+                var description = snoItem.NameLocalized;
+
+                var power = snoItem.LegendaryPower;
+                if (power != null)
+                {
+                    description += "\n\n" + power.DescriptionLocalized;
+                }
+
+                Hud.Render.SetHint(description);
+            }
+
+            var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
+            backgroundTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+
+            var itemTexture = Hud.Texture.GetItemTexture(snoItem);
+            if (itemTexture != null)
+            {
+                itemTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+            }
+            currentX += itemRect.Width;
+        }
+
+
         private void DrawLegendaryGems(IPlayer player)
         {
-
             IEnumerable<IBuff> gemBuffs = player.Powers.UsedLegendaryGems.AllGemPrimaryBuffs().Where(b => b.Active);
             var size = Hud.Window.Size.Width * GemRatio;
             var portraitRect = player.PortraitUiElement.Rectangle;
@@ -224,47 +291,6 @@ namespace Turbo.Plugins.Prrovoss
             }
             currentX += Gap;
         }
-
-
-        private void DrawKanaiItem(ISnoItem snoItem, System.Drawing.RectangleF portraitRect)
-        {
-            var inventoryRect = Hud.Inventory.InventoryMainUiElement.Rectangle;
-
-            var itemRect = new System.Drawing.RectangleF(currentX, portraitRect.Y, Hud.Window.Size.Width * KanaiRatio, Hud.Window.Size.Width * KanaiRatio * 2);
-            itemRect.Offset(0, YOffset);
-            if (snoItem.ItemHeight == 1)
-            {
-                itemRect.Offset(0, YOffset);
-                itemRect.Height /= 2;
-            }
-
-            var slotTexture = Hud.Texture.InventorySlotTexture;
-            slotTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
-
-            if (Hud.Window.CursorInsideRect(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height))
-            {
-                var description = snoItem.NameLocalized;
-
-                var power = snoItem.LegendaryPower;
-                if (power != null)
-                {
-                    description += "\n\n" + power.DescriptionLocalized;
-                }
-
-                Hud.Render.SetHint(description);
-            }
-
-            var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
-            backgroundTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
-
-            var itemTexture = Hud.Texture.GetItemTexture(snoItem);
-            if (itemTexture != null)
-            {
-                itemTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
-            }
-            currentX += itemRect.Width;
-        }
-
 
         public void OnKeyEvent(IKeyEvent keyEvent)
         {
