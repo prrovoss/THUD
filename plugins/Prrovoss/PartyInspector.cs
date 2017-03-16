@@ -151,8 +151,8 @@ namespace Turbo.Plugins.Prrovoss
         {
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
-                var snoItem = Hud.Inventory.GetSnoItem(buff.SnoPower.GetItemSno());
-                if (snoItem != player.CubeSnoItem1 && snoItem != player.CubeSnoItem2 && snoItem != player.CubeSnoItem3) DrawItem(snoItem, player);
+                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();               
+                if (!itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
             }
             currentX += Gap;
         }
