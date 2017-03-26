@@ -1,21 +1,29 @@
 using Turbo.Plugins.Default;
+using System.Globalization;
 
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class MonsterDensityAroundCursor : BasePlugin, IInGameWorldPainter 
+    public class MonsterDensityAroundCursor : BasePlugin, IInGameWorldPainter
     {
         public bool DrawCursorCircle { get; set; }
         public bool DrawCursorLabel { get; set; }
         public bool DrawTopLabel { get; set; }
         public bool DrawCursorLine { get; set; }
+        public bool DrawDistanceLabel { get; set; }
 
         public int Distance { get; set; }
 
         public TopLabelWithTitleDecorator CursorLabelDecorator { get; set; }
         public TopLabelWithTitleDecorator TopLabelDecorator { get; set; }
+        public TopLabelWithTitleDecorator DistanceLabelDecorator { get; set; }
         public IBrush CursorCircleBrush { get; set; }
         public IBrush LineBrush { get; set; }
+
+        public float DistanceLabelXRatio { get; set; }
+        public float DistanceLabelYRatio { get; set; }
+        public float DistanceLabelWRatio { get; set; }
+        public float DistanceLabelHRatio { get; set; }
 
         public float TopLabelXRatio { get; set; }
         public float TopLabelYRatio { get; set; }
@@ -44,6 +52,7 @@ namespace Turbo.Plugins.Prrovoss
             DrawCursorLabel = true;
             DrawTopLabel = true;
             DrawCursorLine = false;
+            DrawDistanceLabel = true;
             Distance = 12;
 
             TopLabelDecorator = new TopLabelWithTitleDecorator(Hud)
@@ -56,6 +65,17 @@ namespace Turbo.Plugins.Prrovoss
             TopLabelYRatio = 0.001f;
             TopLabelWRatio = 0.05f;
             TopLabelHRatio = 0.015f;
+
+            DistanceLabelDecorator = new TopLabelWithTitleDecorator(Hud)
+            {
+                TextFont = hud.Render.CreateFont("tahoma", 9, 255, 255, 255, 255, false, false, true),
+                BorderBrush = Hud.Render.CreateBrush(255, 255, 255, 255, -1),
+                BackgroundBrush = Hud.Render.CreateBrush(0, 0, 0, 0, 0),
+            };
+            DistanceLabelXRatio = 0.5f;
+            DistanceLabelYRatio = 0.35f;
+            DistanceLabelWRatio = 0.045f;
+            DistanceLabelHRatio = 0.015f;
 
             CursorLabelDecorator = new TopLabelWithTitleDecorator(Hud)
             {
@@ -100,9 +120,19 @@ namespace Turbo.Plugins.Prrovoss
                     float height = Hud.Window.Size.Height * TopLabelHRatio;
                     TopLabelDecorator.Paint(x - width / 2, y, width, height, count.ToString(), null, "");
                 }
-                if(DrawCursorLine) {
-                            var player = Hud.Game.Me.ScreenCoordinate;
-							LineBrush.DrawLine(player.X, player.Y, coord.X, coord.Y);
+                if (DrawCursorLine)
+                {
+                    var player = Hud.Game.Me.ScreenCoordinate;
+                    LineBrush.DrawLine(player.X, player.Y, coord.X, coord.Y);
+                }
+                if (DrawDistanceLabel)
+                {
+                    var distance = Hud.Game.Me.FloorCoordinate.XYDistanceTo(cursor);
+                    float x = Hud.Window.Size.Width * DistanceLabelXRatio;
+                    float y = Hud.Window.Size.Height * DistanceLabelYRatio;
+                    float width = Hud.Window.Size.Height * DistanceLabelWRatio;
+                    float height = Hud.Window.Size.Height * DistanceLabelHRatio;
+                    TopLabelDecorator.Paint(x - width / 2, y, width, height, distance.ToString("F1", CultureInfo.InvariantCulture));
                 }
             }
         }

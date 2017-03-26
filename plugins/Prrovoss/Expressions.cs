@@ -109,6 +109,22 @@ namespace Turbo.Plugins.Prrovoss
             list["*perf-rendertime"] = (() => Hud.Stat.RenderPerfCounter.LastValue.ToString("F0") + " (" + Hud.Stat.RenderPerfCounter.LastCount.ToString("F0") + " FPS)");
 
 
+            list["*damred"] = (() => Def.DamageReduction.ToString("F1", CultureInfo.InvariantCulture) + "%");
+            list["*damred-elite"] = (() => Def.DRElite.ToString("F1", CultureInfo.InvariantCulture) + "%");
+            list["*damred-melee"] = (() => Def.DRMelee.ToString("F1", CultureInfo.InvariantCulture) + "%");
+            list["*damred-ranged"] = (() => Def.DRRanged.ToString("F1", CultureInfo.InvariantCulture) + "%");
+            list["*damred-avr-fromtype"] = (() => Def.AverageDamageReductionFromType.ToString("F1", CultureInfo.InvariantCulture) + "%");
+
+            list["*resist-physical"] = (() => Def.ResPhysical.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-cold"] = (() => Def.ResCold.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-fire"] = (() => Def.ResFire.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-lightning"] = (() => Def.ResLightning.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-poison"] = (() => Def.ResPoison.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-arcane"] = (() => Def.ResArcane.ToString("F0", CultureInfo.InvariantCulture));
+            list["*resist-lowest"] = (() => Def.ResLowest.ToString("F0", CultureInfo.InvariantCulture));
+            list["*armor"] = (() => Def.Armor.ToString("F0", CultureInfo.InvariantCulture));
+
+
             //expressions.Add("*perf-memory-usage-gc", (GC.GetTotalMemory(false) / 1024.0 / 1024.0).ToString("F0") + " MB");
             //expressions.Add("*dmg-weapon", BasePlugin.ValueToString(Me.DWHandLeft ? Me.WeaponDMGmh : Me.WeaponDMGoh, ValueFormat.LongNumber));
             //expressions.Add("*exp-all", BasePlugin.ValueToString(Me.ParagonTotalExp, ValueFormat.LongNumber));
@@ -157,18 +173,7 @@ namespace Turbo.Plugins.Prrovoss
             expressions.Add("*monster-damage", BasePlugin.ValueToString(Collect.Actors.MonsterHitpointDecreaseCounter.LastValue, ValueFormat.LongNumber));
             expressions.Add("*dmg-total", BasePlugin.ValueToString(Me.TotalDMG, ValueFormat.LongNumber));
             expressions.Add("*dmg-total-party": { double t = 0); for (int i = 0) ; i < Collect.Players.Length); i++) t += Collect.Players[i].TotalDMG); S = BasePlugin.ValueToString(t, ValueFormat.LongNumber)); }
-            expressions.Add("*resist-lowest", Me.ResLowest.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-physical", Me.ResPhysical.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-cold", Me.ResCold.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-fire", Me.ResFire.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-lightning", Me.ResLightning.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-poison", Me.ResPoison.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*resist-arcane", Me.ResArcane.ToString("F0", CultureInfo.InvariantCulture));
-            expressions.Add("*armor", Me.Armor.ToString("#,0", CultureInfo.InvariantCulture));
-            expressions.Add("*damred", (Me.drCombined * 100).ToString("F0", CultureInfo.InvariantCulture) + "%");
-            expressions.Add("*damred-elite", Math.Round(Me.DRElite * 100, 0).ToString("F0", CultureInfo.InvariantCulture) + "%");
-            expressions.Add("*damred-melee", Math.Round(Me.DRMelee * 100, 0).ToString("F0", CultureInfo.InvariantCulture) + "%");
-            expressions.Add("*damred-ranged", Math.Round(Me.DRRanged * 100, 0).ToString("F0", CultureInfo.InvariantCulture) + "%");
+
             */
         }
 

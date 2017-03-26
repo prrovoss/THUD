@@ -9,7 +9,7 @@ namespace Turbo.Plugins.Prrovoss
         public CustomLabelPlugin_Example()
         {
             // Change this to true if you want to see the new labels
-            Enabled = false;
+            Enabled = true;
         }
 
         public override void Load(IController hud)
