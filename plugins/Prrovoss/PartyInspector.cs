@@ -38,7 +38,7 @@ namespace Turbo.Plugins.Prrovoss
         {
             base.Load(hud);
 
-            Show = true;
+            Show = false;
             ToggleKeyEvent = Hud.Input.CreateKeyEvent(true, Key.F8, false, false, false);
 
             LegendaryGemItemIDs = new Dictionary<uint, uint>();
@@ -136,7 +136,7 @@ namespace Turbo.Plugins.Prrovoss
                             case 3:
                                 if (DrawLegendaryItems)
                                 {
-                                    DrawLegItems(player);
+                                    DrawBuffs(player);
                                 }
                                 break;
                         }
@@ -147,12 +147,12 @@ namespace Turbo.Plugins.Prrovoss
         }
 
 
-        private void DrawLegItems(IPlayer player)
+        private void DrawBuffs(IPlayer player)
         {
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
                 IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();               
-                if (!itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                if ((itemSnos != null) && !itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
             }
             currentX += Gap;
         }
