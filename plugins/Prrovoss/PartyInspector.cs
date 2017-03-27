@@ -8,7 +8,7 @@ using Turbo.Plugins.Jack.Extensions;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class PartyInspector : BasePlugin, IInGameWorldPainter, IKeyEventHandler
+    public class PartyInspector : BasePlugin, IInGameTopPainter, IKeyEventHandler
     {
         public bool Show { get; set; }
         public IKeyEvent ToggleKeyEvent { get; set; }
@@ -32,6 +32,7 @@ namespace Turbo.Plugins.Prrovoss
         public PartyInspector()
         {
             Enabled = true;
+            Order = 99;
         }
 
         public override void Load(IController hud)
@@ -101,8 +102,9 @@ namespace Turbo.Plugins.Prrovoss
             ElementOrder = new List<int>(new int[] { 0, 1, 2, 3 });
         }
 
-        public void PaintWorld(WorldLayer layer)
+        public void PaintTopInGame(ClipState clipState)
         {
+            if (clipState != ClipState.BeforeClip) return; 
             if (Show)
             {
                 foreach (IPlayer player in Hud.Game.Players)
