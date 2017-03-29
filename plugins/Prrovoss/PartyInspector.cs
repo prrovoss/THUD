@@ -8,7 +8,7 @@ using Turbo.Plugins.Jack.Extensions;
 namespace Turbo.Plugins.Prrovoss
 {
 
-    public class PartyInspector : BasePlugin, IInGameWorldPainter, IKeyEventHandler
+    public class PartyInspector : BasePlugin, IInGameTopPainter, IKeyEventHandler
     {
         public bool Show { get; set; }
         public IKeyEvent ToggleKeyEvent { get; set; }
@@ -32,13 +32,14 @@ namespace Turbo.Plugins.Prrovoss
         public PartyInspector()
         {
             Enabled = true;
+            Order = 99;
         }
 
         public override void Load(IController hud)
         {
             base.Load(hud);
 
-            Show = true;
+            Show = false;
             ToggleKeyEvent = Hud.Input.CreateKeyEvent(true, Key.F8, false, false, false);
 
             LegendaryGemItemIDs = new Dictionary<uint, uint>();
@@ -101,10 +102,16 @@ namespace Turbo.Plugins.Prrovoss
             ElementOrder = new List<int>(new int[] { 0, 1, 2, 3 });
         }
 
-        public void PaintWorld(WorldLayer layer)
+        public void PaintTopInGame(ClipState clipState)
         {
+            if (clipState != ClipState.BeforeClip) return; 
             if (Show)
             {
+                if(XOffset==0) XOffset = Hud.Window.Size.Width * 0.14f;
+                if(YOffset==0) YOffset = Hud.Window.Size.Width * 0.012f;
+                if(Gap==0) Gap = Hud.Window.Size.Width * 0.012f;
+
+
                 foreach (IPlayer player in Hud.Game.Players)
                 {
                     currentX = XOffset;
@@ -136,7 +143,7 @@ namespace Turbo.Plugins.Prrovoss
                             case 3:
                                 if (DrawLegendaryItems)
                                 {
-                                    DrawLegItems(player);
+                                    DrawBuffs(player);
                                 }
                                 break;
                         }
@@ -147,12 +154,12 @@ namespace Turbo.Plugins.Prrovoss
         }
 
 
-        private void DrawLegItems(IPlayer player)
+        private void DrawBuffs(IPlayer player)
         {
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
                 IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();               
-                if (!itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                if ((itemSnos != null) && !itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
             }
             currentX += Gap;
         }
@@ -182,15 +189,26 @@ namespace Turbo.Plugins.Prrovoss
 
             if (Hud.Window.CursorInsideRect(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height))
             {
-                var description = snoItem.NameLocalized;
+                var itemName = snoItem.NameLocalized;
 
                 var power = snoItem.LegendaryPower;
+                var powerDesc = "";
                 if (power != null)
                 {
-                    description += "\n\n" + power.DescriptionLocalized;
+                    itemName += "\n\n";
+                    powerDesc = power.DescriptionLocalized;
+                    var patternBegin = powerDesc.IndexOf("{c_magic}");
+                    if(patternBegin!=-1) {
+                        var patternEnd = powerDesc.IndexOf("{/c}") != -1 ? powerDesc.IndexOf("{/c}")+4 : powerDesc.IndexOf("{/c_magic}")+10;
+                        if(patternEnd!= -1) {
+                            var toReplace = powerDesc.Substring(patternBegin,patternEnd-patternBegin);
+                            var replacement = toReplace.Contains("%") ? "X%" : "X";
+                            powerDesc = powerDesc.Replace(toReplace,replacement);                            
+                        }
+                    }
                 }
 
-                Hud.Render.SetHint(description);
+                Hud.Render.SetHint(itemName+powerDesc);
             }
 
             var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
