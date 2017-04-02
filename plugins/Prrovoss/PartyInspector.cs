@@ -104,12 +104,12 @@ namespace Turbo.Plugins.Prrovoss
 
         public void PaintTopInGame(ClipState clipState)
         {
-            if (clipState != ClipState.BeforeClip) return; 
+            if (clipState != ClipState.BeforeClip) return;
             if (Show)
             {
-                if(XOffset==0) XOffset = Hud.Window.Size.Width * 0.14f;
-                if(YOffset==0) YOffset = Hud.Window.Size.Width * 0.012f;
-                if(Gap==0) Gap = Hud.Window.Size.Width * 0.012f;
+                if (XOffset == 0) XOffset = Hud.Window.Size.Width * 0.14f;
+                if (YOffset == 0) YOffset = Hud.Window.Size.Width * 0.012f;
+                if (Gap == 0) Gap = Hud.Window.Size.Width * 0.012f;
 
 
                 foreach (IPlayer player in Hud.Game.Players)
@@ -158,8 +158,15 @@ namespace Turbo.Plugins.Prrovoss
         {
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
-                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();               
-                if ((itemSnos != null) && !itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();
+                if (itemSnos != null)
+                {
+                    var draw = true;
+                    if (player.CubeSnoItem1 != null && itemSnos.Contains(player.CubeSnoItem1.Sno)) draw = false;
+                    if (player.CubeSnoItem2 != null && itemSnos.Contains(player.CubeSnoItem2.Sno)) draw = false;
+                    if (player.CubeSnoItem3 != null && itemSnos.Contains(player.CubeSnoItem3.Sno)) draw = false;
+                    if (draw) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                }
             }
             currentX += Gap;
         }
@@ -198,17 +205,19 @@ namespace Turbo.Plugins.Prrovoss
                     itemName += "\n\n";
                     powerDesc = power.DescriptionLocalized;
                     var patternBegin = powerDesc.IndexOf("{c_magic}");
-                    if(patternBegin!=-1) {
-                        var patternEnd = powerDesc.IndexOf("{/c}") != -1 ? powerDesc.IndexOf("{/c}")+4 : powerDesc.IndexOf("{/c_magic}")+10;
-                        if(patternEnd!= -1) {
-                            var toReplace = powerDesc.Substring(patternBegin,patternEnd-patternBegin);
+                    if (patternBegin != -1)
+                    {
+                        var patternEnd = powerDesc.IndexOf("{/c}") != -1 ? powerDesc.IndexOf("{/c}") + 4 : powerDesc.IndexOf("{/c_magic}") + 10;
+                        if (patternEnd != -1)
+                        {
+                            var toReplace = powerDesc.Substring(patternBegin, patternEnd - patternBegin);
                             var replacement = toReplace.Contains("%") ? "X%" : "X";
-                            powerDesc = powerDesc.Replace(toReplace,replacement);                            
+                            powerDesc = powerDesc.Replace(toReplace, replacement);
                         }
                     }
                 }
 
-                Hud.Render.SetHint(itemName+powerDesc);
+                Hud.Render.SetHint(itemName + powerDesc);
             }
 
             var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
