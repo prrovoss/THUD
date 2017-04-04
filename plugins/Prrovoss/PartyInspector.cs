@@ -130,7 +130,7 @@ namespace Turbo.Plugins.Prrovoss
             DrawLegendaryItems = true;
             DrawMetaInformations = true;
 
-            ElementOrder = new List<int>(new int[] { 0, 1, 2, 3, 4 });
+            ElementOrder = new List<int>(new int[] { 0, 1, 2, 4, 3 });
 
             UpperMeta.Add(new MetaElement(((p) => p.Offense.AttackSpeed.ToString("0.000")), "AS", "Attack Speed"));
             UpperMeta.Add(new MetaElement(((p) => p.Offense.AreaDamageBonus.ToString("F0", CultureInfo.InvariantCulture) + "%"), "AD", "Area Damage"));
@@ -239,7 +239,7 @@ namespace Turbo.Plugins.Prrovoss
             {
                 var itemSno = buff.SnoPower.GetItemSno();
                 if (itemSno == 0) continue;
-                if (cubedItemSnos.Contains(itemSno)) continue;
+                if (cubedItemSnos!=null && cubedItemSnos.Contains(itemSno)) continue;
 
                 DrawItem(Hud.Inventory.GetSnoItem(itemSno), player);
             }
@@ -350,8 +350,9 @@ namespace Turbo.Plugins.Prrovoss
             var portraitRect = player.PortraitUiElement.Rectangle;
             var index = 0;
             var passivesX = currentX;
-            foreach (var skill in player.Powers.SkillSlots)
+            foreach (int i in new int[] {2,3,4,5,0,1})
             {
+                var skill = player.Powers.SkillSlots[i];
                 if (skill != null)
                 {
                     index = skill.Key <= ActionKey.RightSkill ? (int)skill.Key + 4 : (int)skill.Key - 2;
