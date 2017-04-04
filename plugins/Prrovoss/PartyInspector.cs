@@ -22,7 +22,9 @@ namespace Turbo.Plugins.Prrovoss
         public Dictionary<uint, uint> LegendaryGemItemIDs { get; set; }
         public float XOffset { get; set; }
         public float YOffset { get; set; }
-        public float Gap { get; set; }
+        public float GapRatio { get; set; }
+        private float currY { get; set; }
+        private float gap { get; set; }
         public bool DrawKanai { get; set; }
         public bool DrawLegendaryItems { get; set; }
         public bool DrawGems { get; set; }
@@ -120,9 +122,9 @@ namespace Turbo.Plugins.Prrovoss
             LegendaryGemItemIDs.Add(403460, 3248619178); //WoL
             LegendaryGemItemIDs.Add(403468, 3249733225); //Zeis
 
-            XOffset = Hud.Window.Size.Width * 0.14f;
-            YOffset = Hud.Window.Size.Width * 0.012f;
-            Gap = Hud.Window.Size.Width * 0.012f;
+            XOffset = 0.14f;
+            YOffset = 0.012f;
+            GapRatio = 0.012f;
 
             DrawGems = true;
             DrawKanai = true;
@@ -149,13 +151,13 @@ namespace Turbo.Plugins.Prrovoss
             if (clipState != ClipState.BeforeClip) return;
             if (Show)
             {
-                if (XOffset == 0) XOffset = Hud.Window.Size.Width * 0.14f;
-                if (YOffset == 0) YOffset = Hud.Window.Size.Width * 0.012f;
-                if (Gap == 0) Gap = Hud.Window.Size.Width * 0.012f;
+                var x = Hud.Window.Size.Width * XOffset;
+                currY = Hud.Window.Size.Width * YOffset;
+                gap = Hud.Window.Size.Width * GapRatio;
 
                 foreach (IPlayer player in Hud.Game.Players)
                 {
-                    currentX = XOffset;
+                    currentX = x;
 
                     foreach (int element in ElementOrder)
                     {
@@ -206,10 +208,10 @@ namespace Turbo.Plugins.Prrovoss
         {
             var size = Hud.Window.Size.Width * SkillRatio;
             var xUpper = currentX;
-            var yUpper = player.PortraitUiElement.Rectangle.Y + YOffset - player.PortraitUiElement.Rectangle.Width * 0.1f;
+            var yUpper = player.PortraitUiElement.Rectangle.Y + currY - player.PortraitUiElement.Rectangle.Width * 0.1f;
 
             var xLower = currentX;
-            var yLower = player.PortraitUiElement.Rectangle.Y + YOffset + size + player.PortraitUiElement.Rectangle.Width * 0.1f;
+            var yLower = player.PortraitUiElement.Rectangle.Y + currY + size + player.PortraitUiElement.Rectangle.Width * 0.1f;
 
             var width = Hud.Window.Size.Width * ItemRatio;
             var height = Hud.Window.Size.Width * ItemRatio * 0.8f;
@@ -227,23 +229,25 @@ namespace Turbo.Plugins.Prrovoss
                 xLower += size;
             }
 
-            currentX += Math.Max(LowerMeta.Count, UpperMeta.Count) * size + Gap;
+            currentX += Math.Max(LowerMeta.Count, UpperMeta.Count) * size + gap;
         }
 
 
         private void DrawBuffs(IPlayer player)
         {
-            var cubedItemSnos = player.CubedItems.Where(d => d != null).Select(d => d.Sno);
-
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
-                var itemSno = buff.SnoPower.GetItemSno();
-                if (itemSno == 0) continue;
-                if (cubedItemSnos!=null && cubedItemSnos.Contains(itemSno)) continue;
-
-                DrawItem(Hud.Inventory.GetSnoItem(itemSno), player);
+                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();
+                if (itemSnos != null)
+                {
+                    var draw = true;
+                    if (player.CubeSnoItem1 != null && itemSnos.Contains(player.CubeSnoItem1.Sno)) draw = false;
+                    if (player.CubeSnoItem2 != null && itemSnos.Contains(player.CubeSnoItem2.Sno)) draw = false;
+                    if (player.CubeSnoItem3 != null && itemSnos.Contains(player.CubeSnoItem3.Sno)) draw = false;
+                    if (draw) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                }
             }
-            currentX += Gap;
+            currentX += gap;
         }
 
         private void DrawKanaiItems(IPlayer player)
@@ -251,7 +255,7 @@ namespace Turbo.Plugins.Prrovoss
             if (player.CubeSnoItem1 != null) DrawItem(player.CubeSnoItem1, player);
             if (player.CubeSnoItem2 != null) DrawItem(player.CubeSnoItem2, player);
             if (player.CubeSnoItem3 != null) DrawItem(player.CubeSnoItem3, player);
-            currentX += Gap;
+            currentX += gap;
         }
 
         private void DrawItem(ISnoItem snoItem, IPlayer player)
@@ -259,10 +263,10 @@ namespace Turbo.Plugins.Prrovoss
             var portraitRect = player.PortraitUiElement.Rectangle;
 
             var itemRect = new System.Drawing.RectangleF(currentX, portraitRect.Y, Hud.Window.Size.Width * ItemRatio, Hud.Window.Size.Width * ItemRatio * 2);
-            itemRect.Offset(0, YOffset);
+            itemRect.Offset(0, currY);
             if (snoItem.ItemHeight == 1)
             {
-                itemRect.Offset(0, YOffset);
+                itemRect.Offset(0, currY);
                 itemRect.Height /= 2;
             }
 
@@ -322,7 +326,7 @@ namespace Turbo.Plugins.Prrovoss
                     index = 0;
                 }
 
-                var y = portraitRect.Y + YOffset + size * index;
+                var y = portraitRect.Y + currY + size * index;
 
                 var rect = new RectangleF(currentX, y, size, size);
 
@@ -340,7 +344,7 @@ namespace Turbo.Plugins.Prrovoss
 
                 index++;
             }
-            currentX += size + Gap;
+            currentX += size + gap;
         }
 
 
@@ -350,14 +354,14 @@ namespace Turbo.Plugins.Prrovoss
             var portraitRect = player.PortraitUiElement.Rectangle;
             var index = 0;
             var passivesX = currentX;
-            foreach (int i in new int[] {2,3,4,5,0,1})
+            foreach (int i in new int[] { 2, 3, 4, 5, 0, 1 })
             {
                 var skill = player.Powers.SkillSlots[i];
                 if (skill != null)
                 {
                     index = skill.Key <= ActionKey.RightSkill ? (int)skill.Key + 4 : (int)skill.Key - 2;
 
-                    var y = portraitRect.Y + YOffset - portraitRect.Width * 0.1f;
+                    var y = portraitRect.Y + currY - portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(currentX, y, size, size);
 
@@ -377,7 +381,7 @@ namespace Turbo.Plugins.Prrovoss
             {
                 if (skill != null)
                 {
-                    var y = portraitRect.Y + YOffset + size + portraitRect.Width * 0.1f;
+                    var y = portraitRect.Y + currY + size + portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(passivesX, y, size, size);
 
@@ -392,7 +396,7 @@ namespace Turbo.Plugins.Prrovoss
                 passivesX += size * 1.666666f;
                 index++;
             }
-            currentX += Gap;
+            currentX += gap;
         }
 
         public void OnKeyEvent(IKeyEvent keyEvent)
