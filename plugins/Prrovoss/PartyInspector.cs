@@ -4,6 +4,8 @@ using SharpDX;
 using System.Linq;
 using System.Collections.Generic;
 using Turbo.Plugins.Jack.Extensions;
+using System;
+using System.Globalization;
 
 namespace Turbo.Plugins.Prrovoss
 {
@@ -20,12 +22,19 @@ namespace Turbo.Plugins.Prrovoss
         public Dictionary<uint, uint> LegendaryGemItemIDs { get; set; }
         public float XOffset { get; set; }
         public float YOffset { get; set; }
-        public float Gap { get; set; }
+        public float GapRatio { get; set; }
+        private float currY { get; set; }
+        private float gap { get; set; }
         public bool DrawKanai { get; set; }
         public bool DrawLegendaryItems { get; set; }
         public bool DrawGems { get; set; }
         public bool DrawSkills { get; set; }
+        public bool DrawMetaInformations { get; set; }
         public List<int> ElementOrder { get; set; }
+        public List<MetaElement> UpperMeta = new List<MetaElement>();
+        public List<MetaElement> LowerMeta = new List<MetaElement>();
+
+        public TopLabelWithTitleDecorator LabelDecorator { get; set; }
 
         private float currentX { get; set; }
 
@@ -33,6 +42,21 @@ namespace Turbo.Plugins.Prrovoss
         {
             Enabled = true;
             Order = 99;
+        }
+
+
+        public class MetaElement
+        {
+            public string Hint { get; set; }
+            public string Title { get; set; }
+            public Func<IPlayer, string> Text { get; set; }
+
+            public MetaElement(Func<IPlayer, string> text, string title = null, string hint = null)
+            {
+                Hint = hint;
+                Title = title;
+                Text = text;
+            }
         }
 
         public override void Load(IController hud)
@@ -67,6 +91,14 @@ namespace Turbo.Plugins.Prrovoss
             ItemRatio = 0.025f;
             GemRatio = 0.0166666666666667f;
 
+            LabelDecorator = new TopLabelWithTitleDecorator(Hud)
+            {
+                BorderBrush = Hud.Render.CreateBrush(255, 180, 147, 109, -1),
+                BackgroundBrush = Hud.Render.CreateBrush(128, 0, 0, 0, 0),
+                TextFont = Hud.Render.CreateFont("tahoma", 6, 255, 255, 210, 150, false, false, false),
+                TitleFont = Hud.Render.CreateFont("tahoma", 6, 255, 180, 147, 109, false, false, false),
+            };
+
             LegendaryGemItemIDs.Add(428348, 3249948847); //Stricken
             LegendaryGemItemIDs.Add(383014, 3248511367); //BotP
             LegendaryGemItemIDs.Add(403456, 3248547304); //BotT
@@ -90,26 +122,42 @@ namespace Turbo.Plugins.Prrovoss
             LegendaryGemItemIDs.Add(403460, 3248619178); //WoL
             LegendaryGemItemIDs.Add(403468, 3249733225); //Zeis
 
-            XOffset = Hud.Window.Size.Width * 0.14f;
-            YOffset = Hud.Window.Size.Width * 0.012f;
-            Gap = Hud.Window.Size.Width * 0.012f;
+            XOffset = 0.14f;
+            YOffset = 0.012f;
+            GapRatio = 0.012f;
 
             DrawGems = true;
             DrawKanai = true;
             DrawSkills = true;
             DrawLegendaryItems = true;
+            DrawMetaInformations = true;
 
-            ElementOrder = new List<int>(new int[] { 0, 1, 2, 3 });
+            ElementOrder = new List<int>(new int[] { 0, 1, 2, 4, 3 });
+
+            UpperMeta.Add(new MetaElement(((p) => p.Offense.AttackSpeed.ToString("0.000")), "AS", "Attack Speed"));
+            UpperMeta.Add(new MetaElement(((p) => p.Offense.AreaDamageBonus.ToString("F0", CultureInfo.InvariantCulture) + "%"), "AD", "Area Damage"));
+            UpperMeta.Add(new MetaElement(((p) => (p.Stats.CooldownReduction * 100).ToString("F2", CultureInfo.InvariantCulture) + "%"), "CDR", "Cooldown reduction"));
+            UpperMeta.Add(new MetaElement(((p) => (p.Stats.ResourceCostReduction * 100).ToString("F2", CultureInfo.InvariantCulture) + "%"), "RCR", "Resource cost reduction"));
+
+            LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Defense.EhpMax, ValueFormat.ShortNumber)), "EHP", "Effective health pool"));
+            LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Defense.LifeRegen, ValueFormat.ShortNumber)), "LPS", "Life per second"));
+            LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Stats.PickupRange, ValueFormat.ShortNumber)), "PR", "Pickup range"));
         }
+
+
 
         public void PaintTopInGame(ClipState clipState)
         {
-            if (clipState != ClipState.BeforeClip) return; 
+            if (clipState != ClipState.BeforeClip) return;
             if (Show)
             {
+                var x = Hud.Window.Size.Width * XOffset;
+                currY = Hud.Window.Size.Width * YOffset;
+                gap = Hud.Window.Size.Width * GapRatio;
+
                 foreach (IPlayer player in Hud.Game.Players)
                 {
-                    currentX = XOffset;
+                    currentX = x;
 
                     foreach (int element in ElementOrder)
                     {
@@ -141,6 +189,12 @@ namespace Turbo.Plugins.Prrovoss
                                     DrawBuffs(player);
                                 }
                                 break;
+                            case 4:
+                                if (DrawMetaInformations)
+                                {
+                                    DrawMeta(player);
+                                }
+                                break;
                         }
                     }
 
@@ -149,14 +203,51 @@ namespace Turbo.Plugins.Prrovoss
         }
 
 
+
+        private void DrawMeta(IPlayer player)
+        {
+            var size = Hud.Window.Size.Width * SkillRatio;
+            var xUpper = currentX;
+            var yUpper = player.PortraitUiElement.Rectangle.Y + currY - player.PortraitUiElement.Rectangle.Width * 0.1f;
+
+            var xLower = currentX;
+            var yLower = player.PortraitUiElement.Rectangle.Y + currY + size + player.PortraitUiElement.Rectangle.Width * 0.1f;
+
+            var width = Hud.Window.Size.Width * ItemRatio;
+            var height = Hud.Window.Size.Width * ItemRatio * 0.8f;
+
+
+            foreach (MetaElement element in UpperMeta)
+            {
+                LabelDecorator.Paint(xUpper, yUpper, size, size, element.Text(player), element.Title, element.Hint);
+                xUpper += size;
+            }
+
+            foreach (MetaElement element in LowerMeta)
+            {
+                LabelDecorator.Paint(xLower, yLower, size, size, element.Text(player), element.Title, element.Hint);
+                xLower += size;
+            }
+
+            currentX += Math.Max(LowerMeta.Count, UpperMeta.Count) * size + gap;
+        }
+
+
         private void DrawBuffs(IPlayer player)
         {
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
-                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();               
-                if ((itemSnos != null) && !itemSnos.Contains(player.CubeSnoItem1.Sno) && !itemSnos.Contains(player.CubeSnoItem2.Sno) && !itemSnos.Contains(player.CubeSnoItem3.Sno)) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();
+                if (itemSnos != null)
+                {
+                    var draw = true;
+                    if (player.CubeSnoItem1 != null && itemSnos.Contains(player.CubeSnoItem1.Sno)) draw = false;
+                    if (player.CubeSnoItem2 != null && itemSnos.Contains(player.CubeSnoItem2.Sno)) draw = false;
+                    if (player.CubeSnoItem3 != null && itemSnos.Contains(player.CubeSnoItem3.Sno)) draw = false;
+                    if (draw) DrawItem(Hud.Inventory.GetSnoItem(itemSnos.First()), player);
+                }
             }
-            currentX += Gap;
+            currentX += gap;
         }
 
         private void DrawKanaiItems(IPlayer player)
@@ -164,7 +255,7 @@ namespace Turbo.Plugins.Prrovoss
             if (player.CubeSnoItem1 != null) DrawItem(player.CubeSnoItem1, player);
             if (player.CubeSnoItem2 != null) DrawItem(player.CubeSnoItem2, player);
             if (player.CubeSnoItem3 != null) DrawItem(player.CubeSnoItem3, player);
-            currentX += Gap;
+            currentX += gap;
         }
 
         private void DrawItem(ISnoItem snoItem, IPlayer player)
@@ -172,10 +263,10 @@ namespace Turbo.Plugins.Prrovoss
             var portraitRect = player.PortraitUiElement.Rectangle;
 
             var itemRect = new System.Drawing.RectangleF(currentX, portraitRect.Y, Hud.Window.Size.Width * ItemRatio, Hud.Window.Size.Width * ItemRatio * 2);
-            itemRect.Offset(0, YOffset);
+            itemRect.Offset(0, currY);
             if (snoItem.ItemHeight == 1)
             {
-                itemRect.Offset(0, YOffset);
+                itemRect.Offset(0, currY);
                 itemRect.Height /= 2;
             }
 
@@ -184,15 +275,28 @@ namespace Turbo.Plugins.Prrovoss
 
             if (Hud.Window.CursorInsideRect(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height))
             {
-                var description = snoItem.NameLocalized;
+                var itemName = snoItem.NameLocalized;
 
                 var power = snoItem.LegendaryPower;
+                var powerDesc = "";
                 if (power != null)
                 {
-                    description += "\n\n" + power.DescriptionLocalized;
+                    itemName += "\n\n";
+                    powerDesc = power.DescriptionLocalized;
+                    var patternBegin = powerDesc.IndexOf("{c_magic}");
+                    if (patternBegin != -1)
+                    {
+                        var patternEnd = powerDesc.IndexOf("{/c}") != -1 ? powerDesc.IndexOf("{/c}") + 4 : powerDesc.IndexOf("{/c_magic}") + 10;
+                        if (patternEnd != -1)
+                        {
+                            var toReplace = powerDesc.Substring(patternBegin, patternEnd - patternBegin);
+                            var replacement = toReplace.Contains("%") ? "X%" : "X";
+                            powerDesc = powerDesc.Replace(toReplace, replacement);
+                        }
+                    }
                 }
 
-                Hud.Render.SetHint(description);
+                Hud.Render.SetHint(itemName + powerDesc);
             }
 
             var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
@@ -222,7 +326,7 @@ namespace Turbo.Plugins.Prrovoss
                     index = 0;
                 }
 
-                var y = portraitRect.Y + YOffset + size * index;
+                var y = portraitRect.Y + currY + size * index;
 
                 var rect = new RectangleF(currentX, y, size, size);
 
@@ -240,7 +344,7 @@ namespace Turbo.Plugins.Prrovoss
 
                 index++;
             }
-            currentX += size + Gap;
+            currentX += size + gap;
         }
 
 
@@ -250,13 +354,14 @@ namespace Turbo.Plugins.Prrovoss
             var portraitRect = player.PortraitUiElement.Rectangle;
             var index = 0;
             var passivesX = currentX;
-            foreach (var skill in player.Powers.SkillSlots)
+            foreach (int i in new int[] { 2, 3, 4, 5, 0, 1 })
             {
+                var skill = player.Powers.SkillSlots[i];
                 if (skill != null)
                 {
                     index = skill.Key <= ActionKey.RightSkill ? (int)skill.Key + 4 : (int)skill.Key - 2;
 
-                    var y = portraitRect.Y + YOffset - portraitRect.Width * 0.1f;
+                    var y = portraitRect.Y + currY - portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(currentX, y, size, size);
 
@@ -276,7 +381,7 @@ namespace Turbo.Plugins.Prrovoss
             {
                 if (skill != null)
                 {
-                    var y = portraitRect.Y + YOffset + size + portraitRect.Width * 0.1f;
+                    var y = portraitRect.Y + currY + size + portraitRect.Width * 0.1f;
 
                     var rect = new RectangleF(passivesX, y, size, size);
 
@@ -291,7 +396,7 @@ namespace Turbo.Plugins.Prrovoss
                 passivesX += size * 1.666666f;
                 index++;
             }
-            currentX += Gap;
+            currentX += gap;
         }
 
         public void OnKeyEvent(IKeyEvent keyEvent)
