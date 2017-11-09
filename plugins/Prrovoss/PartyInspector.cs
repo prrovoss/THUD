@@ -142,6 +142,8 @@ namespace Turbo.Plugins.Prrovoss
             LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Defense.EhpMax, ValueFormat.ShortNumber)), "EHP", "Effective health pool"));
             LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Defense.LifeRegen, ValueFormat.ShortNumber)), "LPS", "Life per second"));
             LowerMeta.Add(new MetaElement(((p) => ValueToString(p.Stats.PickupRange, ValueFormat.ShortNumber)), "PR", "Pickup range"));
+
+
         }
 
 
@@ -235,8 +237,10 @@ namespace Turbo.Plugins.Prrovoss
 
         private void DrawBuffs(IPlayer player)
         {
+
             foreach (IBuff buff in player.Powers.UsedLegendaryPowers.AllLegendaryPowerBuffs().Where(b => b.Active))
             {
+
                 IEnumerable<uint> itemSnos = buff.SnoPower.GetItemSnos();
                 if (itemSnos != null)
                 {
@@ -260,9 +264,17 @@ namespace Turbo.Plugins.Prrovoss
 
         private void DrawItem(ISnoItem snoItem, IPlayer player)
         {
+
+
+            
+
             var portraitRect = player.PortraitUiElement.Rectangle;
 
             var itemRect = new System.Drawing.RectangleF(currentX, portraitRect.Y, Hud.Window.Size.Width * ItemRatio, Hud.Window.Size.Width * ItemRatio * 2);
+            if (itemRect == null || snoItem == null)
+            {
+                return;
+            }
             itemRect.Offset(0, currY);
             if (snoItem.ItemHeight == 1)
             {
@@ -271,18 +283,20 @@ namespace Turbo.Plugins.Prrovoss
             }
 
             var slotTexture = Hud.Texture.InventorySlotTexture;
-            slotTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+            if(slotTexture!=null) slotTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
 
+            
             if (Hud.Window.CursorInsideRect(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height))
             {
-                var itemName = snoItem.NameLocalized;
+                var itemName = snoItem.NameLocalized ?? "" ;
 
                 var power = snoItem.LegendaryPower;
                 var powerDesc = "";
                 if (power != null)
                 {
                     itemName += "\n\n";
-                    powerDesc = power.DescriptionLocalized;
+                    powerDesc = power.DescriptionLocalized ?? "";
+                    
                     var patternBegin = powerDesc.IndexOf("{c_magic}");
                     if (patternBegin != -1)
                     {
@@ -294,18 +308,19 @@ namespace Turbo.Plugins.Prrovoss
                             powerDesc = powerDesc.Replace(toReplace, replacement);
                         }
                     }
+                    
                 }
 
                 Hud.Render.SetHint(itemName + powerDesc);
             }
 
             var backgroundTexture = snoItem.ItemHeight == 2 ? Hud.Texture.InventoryLegendaryBackgroundLarge : Hud.Texture.InventoryLegendaryBackgroundSmall;
-            backgroundTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+            if(backgroundTexture!=null) backgroundTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
 
             var itemTexture = Hud.Texture.GetItemTexture(snoItem);
             if (itemTexture != null)
             {
-                itemTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
+               itemTexture.Draw(itemRect.X, itemRect.Y, itemRect.Width, itemRect.Height);
             }
             currentX += itemRect.Width;
         }
