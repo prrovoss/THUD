@@ -16,8 +16,9 @@ namespace Turbo.Plugins.Prrovoss.Popups
             public string Hint { get; set; }
             public string Title { get; set; }
             public int Duration { get; set; }
+            public TopLabelWithTitleDecorator Decorator { get; set; }
 
-            public MyMonster(uint sno, string name, string hint, string title, int duration)
+            public MyMonster(uint sno, string name, string hint, string title, int duration, TopLabelWithTitleDecorator decorator = null)
             {
                 MaxHitpoints = new List<double>();
                 this.Sno = sno;
@@ -25,6 +26,7 @@ namespace Turbo.Plugins.Prrovoss.Popups
                 this.Name = name;
                 this.Title = title;
                 this.Duration = duration;
+                this.Decorator = decorator;
             }
         }
 
@@ -33,16 +35,12 @@ namespace Turbo.Plugins.Prrovoss.Popups
         public override void Load(IController hud)
         {
             base.Load(hud);
-            MonstersToWatch = new List<MyMonster>();
-
-            MonstersToWatch.Add(new MyMonster(451002, "Sir William", "", "Appeared", 5000));
-            MonstersToWatch.Add(new MyMonster(450999, "Princess Lilian", "", "Appeared", 5000));
-            
+            MonstersToWatch = new List<MyMonster>();            
         }
 
-        public void Add(uint sno, string name, string hint, string title, int duration)
+        public void Add(uint sno, string name, string hint, string title, int duration, TopLabelWithTitleDecorator decorator = null)
         {
-            MonstersToWatch.Add(new MyMonster(sno, name, hint, title, duration));
+            MonstersToWatch.Add(new MyMonster(sno, name, hint, title, duration, decorator));
         }
 
         public void PaintWorld(WorldLayer layer)

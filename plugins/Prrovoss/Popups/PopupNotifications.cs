@@ -7,8 +7,7 @@ namespace Turbo.Plugins.Prrovoss.Popups
 {
 
     public class PopupNotifications : BasePlugin, IInGameWorldPainter 
-    {
-        public TopLabelWithTitleDecorator PopupDecorator { get; set; }
+    {        
         public float RatioX { get; set; }
         public float RatioY { get; set; }
         public float RatioW { get; set; }
@@ -22,20 +21,34 @@ namespace Turbo.Plugins.Prrovoss.Popups
             public string Hint { get; set; }
             public DateTime QueuedOn { get; private set; }
             public TimeSpan LifeTime { get; private set; }
-            public Popup(string text, string title, TimeSpan lifetime, string hint)
+            public TopLabelWithTitleDecorator Decorator { get; set; }
+
+            public Popup(string text, string title, TimeSpan lifetime, string hint, IController hud, TopLabelWithTitleDecorator decorator = null)
             {
                 this.Text = text;
                 this.Title = title;
                 this.LifeTime = lifetime;
                 this.Hint = hint;
                 this.QueuedOn = DateTime.Now;
+
+                if (decorator == null) {
+                    this.Decorator = new TopLabelWithTitleDecorator(hud)
+                    {
+                        BorderBrush = hud.Render.CreateBrush(255, 180, 147, 109, -1),
+                        BackgroundBrush = hud.Render.CreateBrush(200, 0, 0, 0, 0),
+                        TextFont = hud.Render.CreateFont("tahoma", 8, 255, 255, 255, 255, true, false, false),
+                        TitleFont = hud.Render.CreateFont("tahoma", 6, 255, 180, 147, 109, true, false, false),
+                    };
+                } else {
+                    this.Decorator = decorator;
+                }
             }
         }
 
 
-        public void Show(string text, string title, int duration, string hint = null)
+        public void Show(string text, string title, int duration, string hint = null, TopLabelWithTitleDecorator decorator = null)
         {
-            Hud.Queue.AddItem(new Popup(text, title, new TimeSpan(0, 0, 0, 0, duration), hint));
+            Hud.Queue.AddItem(new Popup(text, title, new TimeSpan(0, 0, 0, 0, duration), hint, Hud, decorator));
         }
 
         public PopupNotifications()
@@ -46,14 +59,6 @@ namespace Turbo.Plugins.Prrovoss.Popups
         public override void Load(IController hud)
         {
             base.Load(hud);
-
-            PopupDecorator = new TopLabelWithTitleDecorator(Hud)
-            {
-                BorderBrush = Hud.Render.CreateBrush(255, 180, 147, 109, -1),
-                BackgroundBrush = Hud.Render.CreateBrush(200, 0, 0, 0, 0),
-                TextFont = Hud.Render.CreateFont("tahoma", 8, 255, 255, 255, 255, true, false, false),
-                TitleFont = Hud.Render.CreateFont("tahoma", 6, 255, 180, 147, 109, true, false, false),
-            };
 
             RatioX = 0.6f;
             RatioY = 0.75f;
@@ -71,7 +76,7 @@ namespace Turbo.Plugins.Prrovoss.Popups
 
             foreach (Popup p in Hud.Queue.GetItems<Popup>().Take(13))
             {
-                    PopupDecorator.Paint(x, y , w, h, p.Text, p.Title, p.Hint);
+                    p.Decorator.Paint(x, y , w, h, p.Text, p.Title, p.Hint);
                     y -= h * VerticalGap;
             }
         }
